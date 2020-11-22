@@ -4,7 +4,6 @@ import torch.optim as optim
 import game2048_env
 from dqn import Qnet, ReplayBuffer, train, learning_rate
 
-
 def main():
     env = game2048_env.Game2048Env()
     q = Qnet(4 * 4 * 16, 4)
@@ -22,7 +21,6 @@ def main():
         done = False
 
         while not done:
-
             a = q.sample_action(torch.from_numpy(s).float(), epsilon)
             s_prime, r, done, info = env.step(a)
             s_prime = s_prime.ravel()

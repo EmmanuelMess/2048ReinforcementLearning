@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from pytorch_lightning.core.lightning import LightningModule
+
 #Hyperparameters
 learning_rate = 0.0005
 gamma         = 0.98
@@ -39,7 +41,7 @@ class ReplayBuffer():
     def size(self):
         return len(self.buffer)
 
-class Qnet(nn.Module):
+class Qnet(LightningModule):
     def __init__(self, input, output):
         super(Qnet, self).__init__()
         self.outputSpace = output
@@ -60,7 +62,7 @@ class Qnet(nn.Module):
         if coin < epsilon:
             return random.randint(0, self.outputSpace-1)
         else : 
-            return out.argmax().item()
+            return out.argmax().detach()
             
 def train(q, q_target, memory, optimizer):
     for i in range(10):
