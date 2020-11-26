@@ -84,7 +84,7 @@ def main():
     score = 0.0
     print_interval = 20
 
-    for n_epi in range(200):
+    for n_epi in range(125000):
         env.reset()
         done = False
         highest = 0
