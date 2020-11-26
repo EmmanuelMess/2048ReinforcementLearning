@@ -7,13 +7,16 @@ from lookup_table import LUT
 def argmax(a):
     return max(range(len(a)), key=lambda x: a[x])
 
+_extraGameLog = game2048_env.Game2048Env()
+_extraGame = game2048_env.Game2048Env()
 
-def set_1d_board(game: game2048_env.Game2048Env, board: np.array):
-    game.set_board(board.reshape((4, 4)))
+
+def set_1d_board(board: np.array):
+    _extraGameLog.set_board(board.reshape((4, 4)))
 
 
-def get_1d_board(game: game2048_env.Game2048Env):
-    return game.get_board().ravel()
+def get_1d_board():
+    return _extraGameLog.get_board().ravel()
 
 
 def set_log_board(game: game2048_env.Game2048Env, board: np.array):
@@ -32,40 +35,40 @@ def get_log_board(game: game2048_env.Game2048Env):
     return x
 
 
-def evaluate(extraGameLog: game2048_env.Game2048Env, extraGame: game2048_env.Game2048Env, board, action, lut: LUT):
-    set_1d_board(extraGameLog, board)
-    set_log_board(extraGame, board)
+def evaluate(board, action, lut: LUT):
+    set_1d_board(board)
+    set_log_board(_extraGame, board)
     try:
-        extraGameLog.move(action)
+        _extraGameLog.move(action)
     except game2048_env.IllegalMove:
         pass
 
     try:
-        reward = extraGame.move(action)
+        reward = _extraGame.move(action)
     except game2048_env.IllegalMove:
         reward = -1
 
-    return reward + lut.calculate(get_1d_board(extraGameLog))
+    return reward + lut.calculate(get_1d_board())
 
 
-def learn_evaluation(extraGameLog: game2048_env.Game2048Env, extraGame: game2048_env.Game2048Env, non_tiled_next_board, next_board, lut: LUT):
-    best_next_action = argmax([evaluate(extraGameLog, extraGame, next_board, 0, lut),
-                                  evaluate(extraGameLog, extraGame, next_board, 1, lut),
-                                  evaluate(extraGameLog, extraGame, next_board, 2, lut),
-                                  evaluate(extraGameLog, extraGame, next_board, 3, lut)])
-    set_1d_board(extraGameLog, next_board)
-    set_log_board(extraGame, next_board)
+def learn_evaluation(non_tiled_next_board, next_board, lut: LUT):
+    best_next_action = argmax([evaluate(next_board, 0, lut),
+                                  evaluate(next_board, 1, lut),
+                                  evaluate(next_board, 2, lut),
+                                  evaluate(next_board, 3, lut)])
+    set_1d_board(next_board)
+    set_log_board(_extraGame, next_board)
     try:
-        extraGameLog.move(best_next_action)
+        _extraGameLog.move(best_next_action)
     except game2048_env.IllegalMove:
         pass
 
     try:
-        reward_next = extraGame.move(best_next_action)
+        reward_next = _extraGame.move(best_next_action)
     except game2048_env.IllegalMove:
         reward_next = -1
 
-    non_tiled_next_next_board = get_1d_board(extraGameLog)
+    non_tiled_next_next_board = get_1d_board()
     lut.update(non_tiled_next_board, non_tiled_next_next_board, reward_next)
 
 
@@ -79,8 +82,6 @@ def main():
     lut = LUT(len(tuples), [4 for i in range(len(tuples))], tuples, 15, 0.0025)
 
     env = game2048_env.Game2048Env()
-    extraGameLog = game2048_env.Game2048Env()
-    extraGame = game2048_env.Game2048Env()
     score = 0.0
     print_interval = 20
 
@@ -91,16 +92,16 @@ def main():
 
         while not done:
             currBoard = get_log_board(env)
-            best_action = argmax([evaluate(extraGameLog, extraGame, currBoard, 0, lut),
-                                     evaluate(extraGameLog, extraGame, currBoard, 1, lut),
-                                     evaluate(extraGameLog, extraGame, currBoard, 2, lut),
-                                     evaluate(extraGameLog, extraGame, currBoard, 3, lut)])
+            best_action = argmax([evaluate(currBoard, 0, lut),
+                                     evaluate(currBoard, 1, lut),
+                                     evaluate(currBoard, 2, lut),
+                                     evaluate(currBoard, 3, lut)])
 
             s_prime, r, done, info = env.step(best_action)
 
-            set_1d_board(extraGame, currBoard)
-            non_tiled_extra_board = get_1d_board(extraGame)
-            learn_evaluation(extraGameLog, extraGame, non_tiled_extra_board, get_log_board(env), lut)
+            set_1d_board(currBoard)
+            non_tiled_extra_board = get_1d_board()
+            learn_evaluation(non_tiled_extra_board, get_log_board(env), lut)
 
             if highest < env.highest():
                 highest = env.highest()
