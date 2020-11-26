@@ -121,8 +121,8 @@ class Game2048Env(gym.Env):
 
     def render(self, mode='human'):
         outfile = sys.stdout
-        s = 'Score: {}\n'.format(self.score)
-        s += 'Highest: {}\n'.format(self.highest())
+        #s = 'Score: {}\n'.format(self.score)
+        s = 'Highest: {}\n'.format(self.highest())
         #npa = np.array(self.Matrix)
         #grid = npa.reshape((self.size, self.size))
         #s += "{}\n".format(grid)
