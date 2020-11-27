@@ -76,11 +76,12 @@ def main():
               [4, 5, 8, 9], [5, 6, 9, 10], [6, 7, 10, 11],
               [8, 9, 12, 13], [9, 10, 13, 14], [10, 11, 14, 15]]
 
-    lut = LUT(len(tuples), [4 for i in range(len(tuples))], tuples, 15, 0.0025)
+    lut = LUT(len(tuples), [4 for i in range(len(tuples))], tuples, 15, 0.01)
 
     env = game2048_env.Game2048Env()
+    env.seed(123)
     score = 0.0
-    print_interval = 20
+    print_interval = 200
 
     for n_epi in range(125000):
         env.reset()

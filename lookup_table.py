@@ -9,7 +9,7 @@ class LUT:
     def index(self, s, i):
         index = 0
         for j in range(len(self.loc[i])):
-            index += int(s[self.loc[i][j]] * (self.c ** (j - 1)))
+            index += int(s[self.loc[i][j]] * (self.c ** j))
         return index
 
     def calculate(self, s):
