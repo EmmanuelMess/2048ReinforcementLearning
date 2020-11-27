@@ -20,7 +20,7 @@ def get_1d_board():
 
 
 def set_log_board(game: game2048_env.Game2048Env, board: np.array):
-    game.set_board((2 ** board).reshape((4, 4)))
+    game.set_board((np.where(board == 0, board, 2 ** board)).reshape((4, 4)))
 
 
 _representation = 2 ** (np.arange(16, dtype=int))
