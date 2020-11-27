@@ -6,14 +6,16 @@ class LUT:
         self.c = c
         self.alpha = alpha
 
+    def index(self, s, i):
+        index = 0
+        for j in range(len(self.loc[i])):
+            index += int(s[self.loc[i][j]] * (self.c ** (j - 1)))
+        return index
+
     def calculate(self, s):
         r = 0
         for i in range(len(self.table)):
-            index = 0
-            for j in range(len(self.loc[i])):
-                index += int(s[self.loc[i][j]] * (self.c ** (j - 1)))
-
-            r += self.table[i][index]
+            r += self.table[i][self.index(s, i)]
 
         return r
 
@@ -23,8 +25,4 @@ class LUT:
         update = self.alpha * (reward + fs_prime - fs)
 
         for i in range(len(self.table)):
-            index = 0
-            for j in range(len(self.loc[i])):
-                index += int(s[self.loc[i][j]] * (self.c ** (j - 1)))
-
-            self.table[i][index] += update
+            self.table[i][self.index(s, i)] += update

@@ -12,14 +12,15 @@ _extraGame = game2048_env.Game2048Env()
 
 
 def set_1d_board(board: np.array):
-    _extraGameLog.set_board(board.reshape((4, 4)))
+    _extraGameLog.set_board(board.copy().reshape((4, 4)))
 
 
 def get_1d_board():
-    return _extraGameLog.get_board().ravel()
+    return _extraGameLog.get_board().copy().ravel()
 
 
 def set_log_board(game: game2048_env.Game2048Env, board: np.array):
+    board = board.copy()
     game.set_board((np.where(board == 0, board, 2 ** board)).reshape((4, 4)))
 
 
@@ -27,7 +28,7 @@ _representation = 2 ** (np.arange(16, dtype=int))
 
 
 def get_log_board(game: game2048_env.Game2048Env):
-    x = game.get_board().ravel()
+    x = game.get_board().copy().ravel()
 
     for i in range(1, 15):
         x = np.where(x == _representation[i], i, x)
@@ -36,8 +37,8 @@ def get_log_board(game: game2048_env.Game2048Env):
 
 
 def compute_afterstate(board, action):
-    set_1d_board(board.copy())
-    set_log_board(_extraGame, board.copy())
+    set_1d_board(board)
+    set_log_board(_extraGame, board)
     try:
         _extraGameLog.move(action)
     except game2048_env.IllegalMove:
@@ -46,10 +47,9 @@ def compute_afterstate(board, action):
     try:
         reward = _extraGame.move(action)
     except game2048_env.IllegalMove:
-        reward = -1
+        reward = 0
 
     return get_1d_board(), reward
-
 
 
 def evaluate(board, action, lut: LUT):
@@ -96,7 +96,7 @@ def main():
 
             s_prime, r, done, info = env.step(best_action)
 
-            set_1d_board(currBoard.copy())
+            set_1d_board(currBoard)
 
             try:
                 _extraGameLog.move(best_action)
