@@ -25,6 +25,6 @@ class LUT:
         for i in range(len(self.table)):
             index = 0
             for j in range(len(self.loc[i])):
-                index += int(self.loc[i][j] * (self.c ** (j - 1)))
+                index += int(s[self.loc[i][j]] * (self.c ** (j - 1)))
 
             self.table[i][index] += update
