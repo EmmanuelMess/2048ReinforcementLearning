@@ -35,7 +35,7 @@ def get_log_board(game: game2048_env.Game2048Env):
     return x
 
 
-def evaluate(board, action, lut: LUT):
+def compute_afterstate(board, action):
     set_1d_board(board.copy())
     set_log_board(_extraGame, board.copy())
     try:
@@ -48,7 +48,14 @@ def evaluate(board, action, lut: LUT):
     except game2048_env.IllegalMove:
         reward = -1
 
-    return reward + lut.calculate(get_1d_board())
+    return get_1d_board(), reward
+
+
+
+def evaluate(board, action, lut: LUT):
+    new_board, reward = compute_afterstate(board, action)
+
+    return reward + lut.calculate(new_board)
 
 
 def learn_evaluation(non_tiled_next_board, next_board, lut: LUT):
@@ -56,19 +63,9 @@ def learn_evaluation(non_tiled_next_board, next_board, lut: LUT):
                                   evaluate(next_board, 1, lut),
                                   evaluate(next_board, 2, lut),
                                   evaluate(next_board, 3, lut)])
-    set_1d_board(next_board.copy())
-    set_log_board(_extraGame, next_board.copy())
-    try:
-        _extraGameLog.move(best_next_action)
-    except game2048_env.IllegalMove:
-        pass
 
-    try:
-        reward_next = _extraGame.move(best_next_action)
-    except game2048_env.IllegalMove:
-        reward_next = -1
+    non_tiled_next_next_board, reward_next = compute_afterstate(next_board, best_next_action)
 
-    non_tiled_next_next_board = get_1d_board()
     lut.update(non_tiled_next_board, non_tiled_next_next_board, reward_next)
 
 
